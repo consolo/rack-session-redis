@@ -80,6 +80,7 @@ module Rack
       end
 
       def set_session(env, session_id, new_session, options)
+        expire_after = options[:expire_after] || options[:expiry]
         with_lock(env, false) do
   
           if options[:renew] or options[:drop]
@@ -89,8 +90,8 @@ module Rack
             session_id = generate_sid
           end
 
-          if options[:expire_after].to_i > 0
-            @redis.setex session_id, options[:expire_after], new_session
+          if expire_after.to_i > 0
+            @redis.setex session_id, expire_after, new_session
           else
             @redis.set session_id, new_session
           end
